@@ -25,3 +25,4 @@
 - `Installed Software`  - List all installed application on the PC
 - `Web Browser Password`  - Get the private file containing web browser password (Works with firefox,Edge & Chrome) (you need copy/past the file to the %appdata% web broser folder to get cleared password)
 - `Screen Capture`  - Get a screen capture before the attack begins
+- `WIFI Password`  - Get in clear all wifi password stored (if pc don't have a wifi password you get a blank txt file)
