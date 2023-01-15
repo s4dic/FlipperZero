@@ -1,4 +1,5 @@
 ### Stole the discord token with the BadUSB mode
+* the script does not require any administrator rights
 
 ## Installation :
 * Step 1: Have a domain name and hosting + a zero flipper
@@ -12,7 +13,7 @@
 * Step 9: Launch the attack (on a vm or on your pc it doesn't matter)
 
 ## Demo :
-[https://youtu.be/OfgyzUYEPXw](https://youtu.be/OfgyzUYEPXw)
+[https://youtu.be/9SCo1_XL6R4](https://youtu.be/9SCo1_XL6R4)
 
 ## Data Exfiltrated :
 - `Token Discord`    - Get the private token of running discord client (+screen capture of token)
