@@ -1,3 +1,6 @@
+### Last update nov 2023:
+Discord, as an application, frequently undergoes numerous updates. The sheer volume of these updates necessitates script adaptations with each new release, a task that has become unfeasible for me to continue. Please consider this script as a proof of concept and feel free to adapt it for future updates.
+
 ### Stole the discord token with the BadUSB mode
 * the script does not require any administrator rights
 
